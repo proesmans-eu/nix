@@ -23,5 +23,30 @@
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDUcKAUBNwlSZYiFc3xmCSSmdb6613MRQN+xq+CjZR7H bert@B-PC"
   ];
 
+  # TODO; Get the F away from fail2ban
+  services.fail2ban = {
+    enable = true;
+    bantime-increment.enable = true;
+    jails = {
+      nginx-bad-request.settings = {
+        enabled = true;
+        backend = "polling";
+        journalmatch = "";
+      };
+
+      nginx-bad-auth = {
+        filter."Definition" = {
+          failregex = "^<HOST> .* \"(GET|POST) .*auth\/login.*\" 401";
+        };
+        settings = {
+	  port    = "http,https";
+	  logpath = "%(nginx_access_log)s";
+          backend = "polling";
+	  journalmatch = "";
+        };
+      };
+    };
+  };
+
   system.stateVersion = "23.11";
 }
